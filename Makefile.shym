@@ -1,0 +1,24 @@
+# auto-generate a ctypes interface from headers and dlls
+# note: this requires ctypeslib.codegen:
+#		easy_install ctypeslib==dev
+
+XML2PY ?= xml2py
+H2XML ?= h2xml
+
+H2XFLAGS = -c
+X2PFLAGS = -d -v
+
+# keep the xml files
+#.SECONDARY: *.xml
+
+%.xml: %.h
+	$(H2XML) $(H2XFLAGS) -I. $(INCLUDE) $^ -o $@ -q
+
+%.py: %.xml
+	$(XML2PY) $(X2PFLAGS) $< $(addprefix -l,$(LIBS)) \
+		$(addprefix -r,$(EXPR)) | ./shym.py $(PREFIX) > $@
+
+clean:
+	rm -f *.xml $(TARGETS) temp.*.py pointers.txt *.pyc
+
+# kate: syntax Makefile
